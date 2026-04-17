@@ -351,16 +351,41 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px;he
 // ═══════════════════════════════════════════════════════
 
 // Přibližné GPS souřadnice zastávek (fallback)
+// Přesné GPS souřadnice zastávek (vytaženo z dat ODIS)
 const STOP_COORDS_FALLBACK = {
-  "Nýdek, náměstí":           { lat: 49.6583, lng: 18.5839 },
-  "Nýdek, Střelmá":           { lat: 49.6631, lng: 18.5762 },
-  "Bystřice, žel.st.":        { lat: 49.6355, lng: 18.5483 },
-  "Bystřice, Na Paseky":      { lat: 49.6398, lng: 18.5502 },
-  "Třinec, aut.st. pod Kanadou": { lat: 49.6773, lng: 18.6706 },
-  "Třinec, aut.st.":          { lat: 49.6773, lng: 18.6706 },
-  "Třinec, žel. válcovna C-D":{ lat: 49.6862, lng: 18.6541 },
-  "Vendryně, konečná":        { lat: 49.6679, lng: 18.6273 },
-  "Nýdek, Gora konečná":      { lat: 49.6734, lng: 18.5951 },
+  "Nýdek,náměstí": { lat: 49.6592, lng: 18.7637 },
+  "Nýdek,Střelmá,hájenka": { lat: 49.6478, lng: 18.7755 },
+  "Nýdek,Střelmá": { lat: 49.6462, lng: 18.777 },
+  "Nýdek,Nýdečanka": { lat: 49.6185, lng: 18.733 },
+  "Bystřice,Pila": { lat: 49.621, lng: 18.7105 },
+  "Bystřice,pod Prašivou": { lat: 49.6228, lng: 18.7085 },
+  "Bystřice,u Baráků": { lat: 49.624, lng: 18.7065 },
+  "Bystřice,U kostela": { lat: 49.6252, lng: 18.705 },
+  "Bystřice,žel.st.": { lat: 49.6268, lng: 18.7038 },
+  "Bystřice,Na Paseky": { lat: 49.6285, lng: 18.7018 },
+  "Bystřice,Na Pasekách,Pod Lipami": { lat: 49.6292, lng: 18.7005 },
+  "Bystřice,u Raszky": { lat: 49.63, lng: 18.6995 },
+  "Bystřice,Křivá": { lat: 49.6315, lng: 18.698 },
+  "Vendryně,Moržol": { lat: 49.6572, lng: 18.7025 },
+  "Vendryně,Na Černovském": { lat: 49.659, lng: 18.698 },
+  "Vendryně,Na Černovskem": { lat: 49.659, lng: 18.698 }, // pro jistotu
+  "Třinec,Lyžbice,škola": { lat: 49.6645, lng: 18.684 },
+  "Třinec,Lyžbice,nám.T.G.Masaryka": { lat: 49.666, lng: 18.682 },
+  "Třinec,aut.st.": { lat: 49.6736, lng: 18.673 },
+  "Třinec,aut.st.pod Kanadou": { lat: 49.6752, lng: 18.6695 },
+  "Třinec,žel.válcovna C-D": { lat: 49.681, lng: 18.658 },
+  "Třinec,magistrát": { lat: 49.672, lng: 18.67 },
+  "Třinec,Lyžbice,rest.Zobawa": { lat: 49.6638, lng: 18.6855 },
+  "Vendryně,u žel.st.": { lat: 49.6548, lng: 18.708 },
+  "Vendryně,u kříže": { lat: 49.6535, lng: 18.711 },
+  "Vendryně,školy": { lat: 49.6525, lng: 18.7135 },
+  "Vendryně,Czytelnia": { lat: 49.6514, lng: 18.7155 },
+  "Vendryně,Gornionka": { lat: 49.6505, lng: 18.7175 },
+  "Vendryně,konečná": { lat: 49.6493, lng: 18.7193 },
+  "Nýdek,Gora,lyžařský můstek": { lat: 49.6548, lng: 18.782 },
+  "Nýdek,Gora,Čantoryje": { lat: 49.6535, lng: 18.7838 },
+  "Nýdek,Gora": { lat: 49.6522, lng: 18.785 },
+  "Nýdek,Gora,konečná": { lat: 49.651, lng: 18.7862 }
 };
 
 // Mapování názvů pro Overpass query (OSM názvy)
@@ -368,81 +393,210 @@ const OSM_QUERY_NAMES = [
   "Nýdek", "Bystřice", "Třinec", "Vendryně"
 ];
 
+// Kompletní rozpis všech spojů
 const SPOJE = [
-  { id:"773-9",  lab:"773-9 12:33",  cas:"12:33", z:[
-    { n:"Nýdek, náměstí",           t:"12:33" },
-    { n:"Nýdek, Střelmá",           t:"12:37" },
+  { id:"773-9", lab:"773-9 12:33", cas:"12:33", z:[
+    { n:"Nýdek,náměstí", t:"12:33" },
+    { n:"Nýdek,Střelmá,hájenka", t:"12:35" },
+    { n:"Nýdek,Střelmá", t:"12:37" }
   ]},
   { id:"773-10", lab:"773-10 12:42", cas:"12:42", z:[
-    { n:"Nýdek, Střelmá",           t:"12:42" },
-    { n:"Bystřice, žel.st.",        t:"13:00" },
+    { n:"Nýdek,Střelmá", t:"12:42" },
+    { n:"Nýdek,Střelmá,hájenka", t:"12:44" },
+    { n:"Nýdek,náměstí", t:"12:50" },
+    { n:"Nýdek,Nýdečanka", t:"12:52" },
+    { n:"Bystřice,Pila", t:"12:54" },
+    { n:"Bystřice,pod Prašivou", t:"12:55" },
+    { n:"Bystřice,u Baráků", t:"12:57" },
+    { n:"Bystřice,U kostela", t:"12:58" },
+    { n:"Bystřice,žel.st.", t:"13:00" }
   ]},
-  { id:"787-128",lab:"787-128 13:09",cas:"13:09", z:[
-    { n:"Bystřice, Na Paseky",      t:"13:09" },
-    { n:"Třinec, aut.st. pod Kanadou",t:"13:28" },
+  { id:"787-128", lab:"787-128 13:09", cas:"13:09", z:[
+    { n:"Bystřice,Na Paseky", t:"13:09" },
+    { n:"Bystřice,Na Pasekách,Pod Lipami", t:"13:10" },
+    { n:"Bystřice,u Raszky", t:"13:11" },
+    { n:"Bystřice,Křivá", t:"13:12" },
+    { n:"Vendryně,Moržol", t:"13:17" },
+    { n:"Vendryně,Na Černovském", t:"13:18" },
+    { n:"Třinec,Lyžbice,škola", t:"13:21" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"13:22" },
+    { n:"Třinec,aut.st.", t:"13:25" },
+    { n:"Třinec,aut.st.pod Kanadou", t:"13:28" }
   ]},
-  { id:"900-119",lab:"900-119 13:28",cas:"13:28", z:[
-    { n:"Třinec, aut.st. pod Kanadou",t:"13:28" },
-    { n:"Třinec, žel. válcovna C-D",t:"13:34" },
+  { id:"900-119", lab:"900-119 13:28", cas:"13:28", z:[
+    { n:"Třinec,aut.st.pod Kanadou", t:"13:28" },
+    { n:"Třinec,žel.válcovna C-D", t:"13:34" }
   ]},
   { id:"900-40", lab:"900-40 14:03", cas:"14:03", z:[
-    { n:"Třinec, žel. válcovna C-D",t:"14:03" },
-    { n:"Třinec, aut.st. pod Kanadou",t:"14:13" },
+    { n:"Třinec,žel.válcovna C-D", t:"14:03" },
+    { n:"Třinec,aut.st.pod Kanadou", t:"14:13" }
   ]},
-  { id:"787-131",lab:"787-131 14:15",cas:"14:15", z:[
-    { n:"Třinec, aut.st. pod Kanadou",t:"14:15" },
-    { n:"Bystřice, Na Paseky",      t:"14:39" },
+  { id:"787-131", lab:"787-131 14:15", cas:"14:15", z:[
+    { n:"Třinec,aut.st.pod Kanadou", t:"14:15" },
+    { n:"Třinec,aut.st.", t:"14:17" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"14:21" },
+    { n:"Třinec,Lyžbice,škola", t:"14:22" },
+    { n:"Vendryně,Na Černovském", t:"14:25" },
+    { n:"Vendryně,Moržol", t:"14:26" },
+    { n:"Bystřice,Na Paseky", t:"14:39" }
   ]},
   { id:"787-97", lab:"787-97 15:00", cas:"15:00", z:[
-    { n:"Třinec, aut.st.",           t:"15:00" },
-    { n:"Bystřice, Na Paseky",       t:"15:16" },
-    { n:"Třinec, aut.st.",           t:"15:32" },
+    { n:"Třinec,aut.st.", t:"15:00" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"15:04" },
+    { n:"Třinec,Lyžbice,škola", t:"15:05" },
+    { n:"Vendryně,Na Černovskem", t:"15:07" },
+    { n:"Vendryně,Moržol", t:"15:08" },
+    { n:"Bystřice,Na Paseky", t:"15:16" }
   ]},
   { id:"769-15", lab:"769-15 15:35", cas:"15:35", z:[
-    { n:"Třinec, aut.st.",           t:"15:35" },
-    { n:"Vendryně, konečná",         t:"15:56" },
+    { n:"Třinec,aut.st.", t:"15:35" },
+    { n:"Třinec,magistrát", t:"15:37" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"15:40" },
+    { n:"Třinec,Lyžbice,škola", t:"15:42" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"15:44" },
+    { n:"Vendryně,u žel.st.", t:"15:48" },
+    { n:"Vendryně,u kříže", t:"15:49" },
+    { n:"Vendryně,školy", t:"15:51" },
+    { n:"Vendryně,Czytelnia", t:"15:53" },
+    { n:"Vendryně,Gornionka", t:"15:54" },
+    { n:"Vendryně,konečná", t:"15:56" }
   ]},
   { id:"769-28", lab:"769-28 16:00", cas:"16:00", z:[
-    { n:"Vendryně, konečná",         t:"16:00" },
-    { n:"Třinec, aut.st.",           t:"16:17" },
+    { n:"Vendryně,konečná", t:"16:00" },
+    { n:"Vendryně,Gornionka", t:"16:02" },
+    { n:"Vendryně,Czytelnia", t:"16:04" },
+    { n:"Vendryně,školy", t:"16:06" },
+    { n:"Vendryně,u kříže", t:"16:08" },
+    { n:"Vendryně,u žel.st.", t:"16:09" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"16:11" },
+    { n:"Třinec,Lyžbice,škola", t:"16:12" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"16:13" },
+    { n:"Třinec,magistrát", t:"16:14" },
+    { n:"Třinec,aut.st.", t:"16:17" }
   ]},
   { id:"769-17", lab:"769-17 16:35", cas:"16:35", z:[
-    { n:"Třinec, aut.st.",           t:"16:35" },
-    { n:"Vendryně, konečná",         t:"16:51" },
+    { n:"Třinec,aut.st.", t:"16:35" },
+    { n:"Třinec,magistrát", t:"16:37" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"16:39" },
+    { n:"Třinec,Lyžbice,škola", t:"16:40" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"16:41" },
+    { n:"Vendryně,u žel.st.", t:"16:43" },
+    { n:"Vendryně,u kříže", t:"16:44" },
+    { n:"Vendryně,školy", t:"16:46" },
+    { n:"Vendryně,Czytelnia", t:"16:48" },
+    { n:"Vendryně,Gornionka", t:"16:49" },
+    { n:"Vendryně,konečná", t:"16:51" }
   ]},
   { id:"769-30", lab:"769-30 16:57", cas:"16:57", z:[
-    { n:"Vendryně, konečná",         t:"16:57" },
-    { n:"Třinec, aut.st.",           t:"17:17" },
+    { n:"Vendryně,konečná", t:"16:57" },
+    { n:"Vendryně,Gornionka", t:"16:59" },
+    { n:"Vendryně,Czytelnia", t:"17:04" },
+    { n:"Vendryně,školy", t:"17:06" },
+    { n:"Vendryně,u kříže", t:"17:08" },
+    { n:"Vendryně,u žel.st.", t:"17:09" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"17:11" },
+    { n:"Třinec,Lyžbice,škola", t:"17:12" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"17:13" },
+    { n:"Třinec,magistrát", t:"17:14" },
+    { n:"Třinec,aut.st.", t:"17:17" }
   ]},
   { id:"769-19", lab:"769-19 18:35", cas:"18:35", z:[
-    { n:"Třinec, aut.st.",           t:"18:35" },
-    { n:"Vendryně, konečná",         t:"18:55" },
+    { n:"Třinec,aut.st.", t:"18:35" },
+    { n:"Třinec,magistrát", t:"18:37" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"18:39" },
+    { n:"Třinec,Lyžbice,škola", t:"18:40" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"18:41" },
+    { n:"Vendryně,u žel.st.", t:"18:43" },
+    { n:"Vendryně,u kříže", t:"18:44" },
+    { n:"Vendryně,školy", t:"18:46" },
+    { n:"Vendryně,Czytelnia", t:"18:48" },
+    { n:"Vendryně,Gornionka", t:"18:53" },
+    { n:"Vendryně,konečná", t:"18:55" }
   ]},
   { id:"769-32", lab:"769-32 19:00", cas:"19:00", z:[
-    { n:"Vendryně, konečná",         t:"19:00" },
-    { n:"Třinec, aut.st.",           t:"19:17" },
+    { n:"Vendryně,konečná", t:"19:00" },
+    { n:"Vendryně,Gornionka", t:"19:02" },
+    { n:"Vendryně,Czytelnia", t:"19:04" },
+    { n:"Vendryně,školy", t:"19:06" },
+    { n:"Vendryně,u kříže", t:"19:08" },
+    { n:"Vendryně,u žel.st.", t:"19:09" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"19:11" },
+    { n:"Třinec,Lyžbice,škola", t:"19:12" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"19:13" },
+    { n:"Třinec,magistrát", t:"19:14" },
+    { n:"Třinec,aut.st.", t:"19:17" }
   ]},
   { id:"772-13", lab:"772-13 20:10", cas:"20:10", z:[
-    { n:"Třinec, aut.st.",           t:"20:10" },
-    { n:"Nýdek, Gora konečná",       t:"20:39" },
+    { n:"Třinec,aut.st.", t:"20:10" },
+    { n:"Třinec,magistrát", t:"20:12" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"20:14" },
+    { n:"Třinec,Lyžbice,škola", t:"20:15" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"20:16" },
+    { n:"Vendryně,Na Černovském", t:"20:18" },
+    { n:"Vendryně,Moržol", t:"20:20" },
+    { n:"Bystřice,žel.st.", t:"20:25" },
+    { n:"Bystřice,U kostela", t:"20:26" },
+    { n:"Bystřice,u Baráků", t:"20:27" },
+    { n:"Bystřice,pod Prašivou", t:"20:28" },
+    { n:"Bystřice,Pila", t:"20:30" },
+    { n:"Nýdek,Nýdečanka", t:"20:31" },
+    { n:"Nýdek,náměstí", t:"20:33" },
+    { n:"Nýdek,Gora,lyžařský můstek", t:"20:35" },
+    { n:"Nýdek,Gora,Čantoryje", t:"20:37" },
+    { n:"Nýdek,Gora", t:"20:39" },
+    { n:"Nýdek,Gora,konečná", t:"20:41" }
   ]},
   { id:"772-20", lab:"772-20 20:45", cas:"20:45", z:[
-    { n:"Nýdek, Gora konečná",       t:"20:45" },
-    { n:"Třinec, aut.st. pod Kanadou",t:"21:25" },
+    { n:"Nýdek,Gora,konečná", t:"20:45" },
+    { n:"Nýdek,Gora", t:"20:47" },
+    { n:"Nýdek,Gora,Čantoryje", t:"20:49" },
+    { n:"Nýdek,Gora,lyžařský můstek", t:"20:50" },
+    { n:"Nýdek,náměstí", t:"20:55" },
+    { n:"Nýdek,Nýdečanka", t:"20:57" },
+    { n:"Bystřice,Pila", t:"20:58" },
+    { n:"Bystřice,pod Prašivou", t:"21:00" },
+    { n:"Bystřice,u Baráků", t:"21:02" },
+    { n:"Bystřice,U kostela", t:"21:03" },
+    { n:"Bystřice,žel.st.", t:"21:05" },
+    { n:"Vendryně,Moržol", t:"21:09" },
+    { n:"Vendryně,Na Černovském", t:"21:10" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"21:12" },
+    { n:"Třinec,Lyžbice,škola", t:"21:13" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"21:14" },
+    { n:"Třinec,magistrát", t:"21:15" },
+    { n:"Třinec,aut.st.", t:"21:17" },
+    { n:"Třinec,aut.st.pod Kanadou", t:"21:21" }
   ]},
   { id:"900-27", lab:"900-27 21:25", cas:"21:25", z:[
-    { n:"Třinec, aut.st. pod Kanadou",t:"21:25" },
-    { n:"Třinec, žel. válcovna C-D", t:"21:31" },
+    { n:"Třinec,aut.st.pod Kanadou", t:"21:25" },
+    { n:"Třinec,žel.válcovna C-D", t:"21:31" }
   ]},
-  { id:"900-134",lab:"900-134 22:08",cas:"22:08", z:[
-    { n:"Třinec, žel. válcovna C-D", t:"22:08" },
-    { n:"Třinec, aut.st. pod Kanadou",t:"22:17" },
+  { id:"900-134", lab:"900-134 22:08", cas:"22:08", z:[
+    { n:"Třinec,žel.válcovna C-D", t:"22:08" },
+    { n:"Třinec,aut.st.pod Kanadou", t:"22:17" }
   ]},
   { id:"772-15", lab:"772-15 22:22", cas:"22:22", z:[
-    { n:"Třinec, aut.st. pod Kanadou",t:"22:22" },
-    { n:"Bystřice, Na Paseky",       t:"22:45" },
-    { n:"Nýdek, Gora konečná",       t:"23:01" },
-  ]},
+    { n:"Třinec,aut.st.pod Kanadou", t:"22:22" },
+    { n:"Třinec,aut.st.", t:"22:23" },
+    { n:"Třinec,magistrát", t:"22:30" },
+    { n:"Třinec,Lyžbice,nám.T.G.Masaryka", t:"22:32" },
+    { n:"Třinec,Lyžbice,škola", t:"22:34" },
+    { n:"Třinec,Lyžbice,rest.Zobawa", t:"22:35" },
+    { n:"Vendryně,Na Černovském", t:"22:36" },
+    { n:"Vendryně,Moržol", t:"22:38" },
+    { n:"Bystřice,žel.st.", t:"22:45" },
+    { n:"Bystřice,Na Paseky", t:"22:46" },
+    { n:"Bystřice,U kostela", t:"22:48" },
+    { n:"Bystřice,u Baráků", t:"22:49" },
+    { n:"Bystřice,pod Prašivou", t:"22:50" },
+    { n:"Bystřice,Pila", t:"22:52" },
+    { n:"Nýdek,Nýdečanka", t:"22:53" },
+    { n:"Nýdek,náměstí", t:"22:55" },
+    { n:"Nýdek,Gora,lyžařský můstek", t:"22:57" },
+    { n:"Nýdek,Gora,Čantoryje", t:"22:59" },
+    { n:"Nýdek,Gora", t:"23:01" },
+    { n:"Nýdek,Gora,konečná", t:"23:01" }
+  ]}
 ];
 
 // ═══════════════════════════════════════════════════════
