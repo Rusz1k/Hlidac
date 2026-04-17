@@ -213,6 +213,32 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px;he
 .spin { width:40px;height:40px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 .ltxt { font-family:var(--mono); font-size:13px; color:var(--muted); text-align:center; }
+
+/* MANUÁLNÍ PŘEPÍNÁNÍ */
+.nav-manual {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.mbtn {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px;
+  border-radius: 6px;
+  font-family: var(--ui);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.mbtn:active {
+  background: var(--accent);
+  color: #000;
+}
+  
 </style>
 </head>
 <body>
@@ -252,6 +278,10 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:16px;he
   <div class="cur-card">
     <div class="cur-label">▶ Aktuální zastávka</div>
     <div class="cur-name" id="curName">Vyberte spoj →</div>
+    <div class="nav-manual">
+  <button class="mbtn" onclick="prevStop()">◀ Zpět</button>
+  <button class="mbtn" onclick="nextStop()">Vpřed ▶</button>
+</div>
     <div class="cur-times">
       <div class="tblk"><div class="tv a" id="curPlan">--:--</div><div class="tl">Plán</div></div>
       <div class="tsep">→</div>
@@ -603,6 +633,7 @@ const SPOJE = [
 // STATE
 // ═══════════════════════════════════════════════════════
 let S = {
+  manualMode: false,
   spoj: null,
   gpsOn: true,
   vibOn: true,
@@ -736,6 +767,24 @@ function manualGPS() {
   stopGPS();
   startGPS();
 }
+  function nextStop() {
+  if (!S.spoj) return;
+  const sp = SPOJE.find(x => x.id === S.spoj);
+  if (S.curIdx < sp.z.length - 1) {
+    S.curIdx++;
+    S.manualMode = true; // Zapne manuální režim, aby čas nevrátil zastávku zpět
+    updateCurrentCard();
+  }
+}
+
+function prevStop() {
+  if (!S.spoj) return;
+  if (S.curIdx > 0) {
+    S.curIdx--;
+    S.manualMode = true;
+    updateCurrentCard();
+  }
+}
 
 function setGPSStatus(cls, txt) {
   const d = document.getElementById("gdot");
@@ -744,7 +793,7 @@ function setGPSStatus(cls, txt) {
 }
 
 function updateGPSDisplay() {
-  if (!S.pos) return;
+  if (!S.pos && !S.manualMode) return;
   document.getElementById("gLat").textContent = S.pos.lat.toFixed(5);
   document.getElementById("gLng").textContent = S.pos.lng.toFixed(5);
   document.getElementById("sKmh").textContent = S.speed + " km/h";
@@ -1010,6 +1059,7 @@ function buildSpojBar() {
 function selectSpoj(id) {
   S.spoj = id;
   S.curIdx = 0;
+  S.manualMode = false;
   S.alerts = {};
   document.querySelectorAll(".stab").forEach(b => b.classList.remove("active"));
   const btn = document.getElementById("sb_"+id);
